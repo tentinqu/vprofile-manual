@@ -95,5 +95,6 @@ vagrant ssh app01
 ```
 
 ### Application accessible via Nginx IP once provisioning completes.
+Full project Write-up [here](https://www.notion.so/VProfile-Web-Application-Stack-Setup-1e57d8e8dcad800faa26c8e06d0439d2?pvs=4)
+Check out the original code [here](https://github.com/hkhcoder/vprofile-project.git)
 
-Check out the original code from https://github.com/hkhcoder/vprofile-project.git
