@@ -1,101 +1,130 @@
-# Prerequisites
-#
-- JDK 17 or 21
-- Maven 3.9
-- MySQL 8
+# 🧱 VProfile Application Stack (Manual Setup)
 
-# Technologies 
-- Spring MVC
-- Spring Security
-- Spring Data JPA
-- Maven
-- JSP
-- Tomcat
-- MySQL
-- Memcached
-- Rabbitmq
-- ElasticSearch
-# Database
-Here,we used Mysql DB 
-sql dump file:
-- /src/main/resources/db_backup.sql
-- db_backup.sql file is a mysql dump file.we have to import this dump to mysql db server
-- > mysql -u <user_name> -p accounts < db_backup.sql
+A hands-on DevOps project to simulate a **multi-tier Java web application** stack using:
 
-# vProfile Project – Manual Setup with Vagrant Automation
+**Nginx · Apache Tomcat · RabbitMQ · Memcache · MySQL · Maven · Vagrant**
 
-This project is a manual setup of the **vProfile** web application stack, intended to replicate a real-world deployment environment without relying on cloud infrastructure. It highlights the traditional approach of provisioning, configuring, and linking multiple services, with an added **automated setup using Vagrant** for reproducibility and efficiency.
+> All components are manually configured to reflect real-world deployment patterns. Also includes Vagrant-based automation for local provisioning.
 
 ---
 
-## Stack Components
+## 📊 Stack Architecture Overview
 
-The application is a **Java-based web app** deployed using:
+The goal is to deploy a **Java-based web application** (`vProfile`) across a modular stack with clearly defined responsibilities:
 
-- **Nginx**: Load Balancer (LB01)
-- **Apache Tomcat**: Application Server (APP01)
-- **MySQL**: Database (DB01)
-- **RabbitMQ**: Message Broker (RMQ01)
-- **Memcached**: Cache Layer (MC01)
+| Layer              | Component    | Role                            |
+| ------------------ | ------------ | ------------------------------- |
+| Load Balancing     | **Nginx**    | Routes user requests to backend |
+| Application Server | **Tomcat**   | Hosts the Java WAR app          |
+| Messaging          | **RabbitMQ** | Asynchronous message brokering  |
+| Caching            | **Memcache** | Speeds up frequent DB queries   |
+| Database           | **MySQL**    | Relational data store           |
+| Build Tool         | **Maven**    | WAR packaging of the Java app   |
 
-Optional suggestion: **NFS** can be used as shared storage if external file storage is required (not implemented in this setup).
+> 📷 Screenshots included in the `screenshots/` folder.
 
 ---
 
-## Flow of the Stack
+## ⚙️ Stack Flow
 
-1. **User** accesses the application via the IP of the load balancer (Nginx).
-2. **Nginx** forwards traffic to **Apache Tomcat**, which hosts the Java `.war` artifact.
-3. Before Tomcat hits the **MySQL** server, it checks **Memcached** to serve cached queries.
-4. **RabbitMQ** is also integrated as a messaging queue (though non-functional in this demo).
-5. All service IPs and ports are configured in `application.properties` under: src/main/resources/application.properties
-   
-Example:
-```properties
-db01.url=jdbc:mysql://db01:3306/accounts
-db01.username=admin
-db01.password=admin123
-```
-## Manual Setup Instructions
-1. Install Maven 3.9, Java 8+, MySQL, RabbitMQ, Memcached, and Tomcat on respective servers.
+1. **User → Nginx (LB)**
+   IP-based access triggers Nginx to forward requests to Tomcat.
 
-2. Build the app:
-```
+2. **Tomcat → App Logic**
+   Tomcat runs the `vprofile.war` file (packaged via Maven) and serves dynamic Java content.
+
+3. **Tomcat ↔ Memcache**
+   Checks Memcache for query results. If a miss, it queries MySQL and updates the cache.
+
+4. **MySQL → Data Layer**
+   Stores application state, logs, and user data.
+
+5. **RabbitMQ (Planned)**
+   Message queue integration planned for async processing.
+
+---
+
+## 🛠️ Configuration Highlights
+
+### `application.properties`
+
+Located at: `src/main/resources/application.properties`
+
+Contains all key service configs:
+
+* MySQL DB host, port, creds
+* RabbitMQ settings
+* Memcache endpoints
+* App-specific variables
+
+---
+
+### Maven Build
+
+Build WAR file using:
+
+```bash
 /usr/local/maven3.9/bin/mvn install
 ```
-3. Copy the WAR file to Tomcat:
 
-```
-cp target/vprofile-v2.war /opt/tomcat/webapps/ROOT.war
-```
-4. Start and enable services:
-```
-sudo systemctl enable --now tomcat nginx mysql memcached rabbitmq-server
-```
+This generates the deployable `.war` file for Tomcat.
 
-5. Ensure proper IP binding for inter-VM communication (e.g., 0.0.0.0 instead of 127.0.0.1).
+---
 
-## Vagrant Automated Setup
-This project includes a Vagrantfile for spinning up pre-configured local VMs.
+## 🚧 Challenges & Fixes
 
-Instructions:
-(Optional) Remove previous boxes if needed:
+| Issue                | Solution                                                  |
+| -------------------- | --------------------------------------------------------- |
+| Nginx not proxying   | Fine-tuned `nginx.conf` to reverse-proxy to Tomcat        |
+| RabbitMQ dummy state | Set up service, full integration pending                  |
+| Memcache staleness   | Handled by setting eviction policies + TTLs               |
+| Localhost IP limits  | Updated services to bind to `0.0.0.0` for external access |
 
-```
+---
+
+## 📦 Vagrant-Based Local Automation
+
+To simulate the stack in local VMs:
+
+### 🪜 Steps
+
+```bash
+# (Optional) Remove existing base box
 vagrant box remove ubuntu/jammy64 --force
-```
 
-Provision the environment:
-```
+# Spin up all VMs
 vagrant up
-```
-Access each VM (e.g.):
-```
-vagrant ssh app01
+
+# SSH into any VM
+vagrant ssh <vm-name>
 ```
 
-### Application accessible via Nginx IP once provisioning completes.
-Full project Write-up [here](https://www.notion.so/VProfile-Web-Application-Stack-Setup-1e57d8e8dcad800faa26c8e06d0439d2?pvs=4)
+> Each VM auto-installs its required services (Nginx, Tomcat, RabbitMQ, etc.)
 
-Check out the original code [here](https://github.com/hkhcoder/vprofile-project.git)
+---
 
+## ✅ Outcome
+
+* Fully functioning multi-tier Java web app stack.
+* Manual provisioning emphasizes understanding over abstraction.
+* RabbitMQ integration & NFS storage planned for future expansion.
+
+
+---
+
+## 🚀 What's Next?
+
+* [ ] Fully integrate RabbitMQ and simulate service queues
+* [ ] Add shared storage via NFS
+* [ ] Containerize with Docker (WIP)
+
+---
+
+## 👋 Author
+
+**Harshit Chauhan**
+[LinkedIn](https://www.linkedin.com/in/harshit-chauhan-tentinqu) | [Medium](https://medium.com/@harshitchauhan2233) | [GitHub](https://github.com/tentinqu)
+
+---
+
+Let me know if you want this formatted as a Notion-compatible markdown table or want a copy ready for pasting into your GitHub repo.
