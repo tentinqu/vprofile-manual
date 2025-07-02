@@ -125,7 +125,7 @@ vagrant ssh <vm-name>
 **Harshit Chauhan**
 [LinkedIn](https://www.linkedin.com/in/harshit-chauhan-tentinqu) | [Medium](https://medium.com/@harshitchauhan2233) | [GitHub](https://github.com/tentinqu)
 Check out the original code [here](https://github.com/hkhcoder/vprofile-project/tree/atom)
-Read full article [here](Check out the original code [here](https://github.com/hkhcoder/vprofile-project/tree/atom)
+Read full article [here](https://github.com/hkhcoder/vprofile-project/tree/atom)
 
 ---
 
